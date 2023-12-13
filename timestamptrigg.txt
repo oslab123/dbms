@@ -1,0 +1,16 @@
+-- Create the 'employee' table
+CREATE TABLE employee (
+employee_id NUMBER PRIMARY KEY,
+first_nameVARCHAR2(50),
+last_nameVARCHAR2(50),
+last_modified TIMESTAMP
+);
+
+-- Create a trigger to update the 'last_modified' timestamp
+CREATE OR REPLACE TRIGGER update_last_modified
+BEFORE UPDATE ON employee
+FOR EACH ROW
+BEGIN
+:NEW.last_modified := SYSTIMESTAMP;
+END;
+/
