@@ -1,0 +1,53 @@
+CREATE OR REPLACE PACKAGE hr_management_pkg AS
+    -- Procedure to update salary for an employee
+    PROCEDURE update_salary(p_employee_id NUMBER, p_new_salary NUMBER);
+
+    -- Function to find the salary budget of a department
+    FUNCTION get_salary_budget(p_department_id NUMBER) RETURN NUMBER;
+END hr_management_pkg;
+/
+
+CREATE OR REPLACE PACKAGE BODY hr_management_pkg AS
+    -- Procedure to update salary for an employee
+    PROCEDURE update_salary(p_employee_id NUMBER, p_new_salary NUMBER) IS
+    BEGIN
+        UPDATE employees
+        SET salary = p_new_salary
+        WHERE employee_id = p_employee_id;
+
+        COMMIT;
+    END update_salary;
+
+    -- Function to find the salary budget of a department
+    FUNCTION get_salary_budget(p_department_id NUMBER) RETURN NUMBER IS
+        v_total_salary NUMBER;
+    BEGIN
+        -- Calculate the total salary budget for the department
+        SELECT SUM(salary) INTO v_total_salary
+        FROM employees
+        WHERE department_id = p_department_id;
+
+        -- If the department doesn't exist or has no employees, return 0
+        IF v_total_salary IS NULL THEN
+            v_total_salary := 0;
+        END IF;
+
+        RETURN v_total_salary;
+    END get_salary_budget;
+END hr_management_pkg;
+/
+
+
+-- Update salary for employee
+BEGIN
+    hr_management_pkg.update_salary(1, 65000); -- Update the salary for employee with ID 1 to 65000
+    COMMIT;
+END;
+
+-- Get salary budget for a department
+DECLARE
+    v_budget NUMBER;
+BEGIN
+    v_budget := hr_management_pkg.get_salary_budget(1); -- Get the salary budget for department with ID 1
+    DBMS_OUTPUT.PUT_LINE('Salary Budget: ' || v_budget);
+END;

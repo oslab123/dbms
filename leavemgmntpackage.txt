@@ -1,0 +1,75 @@
+CREATE OR REPLACE PACKAGE leave_management_pkg AS
+
+      PROCEDURE grant_leave(p_employee_id NUMBER, p_leave_days NUMBER);
+
+
+      FUNCTION get_balance_leaves(p_employee_id NUMBER) RETURN NUMBER;
+  END leave_management_pkg;
+  /
+-- Creating leave_balance table outside of the package body
+CREATE TABLE leave_balance (
+    employee_id     NUMBER PRIMARY KEY,
+    balance_leaves  NUMBER DEFAULT 0
+);
+
+-- Creating the package specification
+CREATE OR REPLACE PACKAGE leave_management_pkg AS
+    PROCEDURE grant_leave(p_employee_id IN NUMBER, p_leave_days OUT NUMBER);
+    FUNCTION get_balance_leaves(p_employee_id IN NUMBER) RETURN NUMBER;
+END leave_management_pkg;
+/
+
+-- Creating the package body
+CREATE OR REPLACE PACKAGE BODY leave_management_pkg AS
+    PROCEDURE grant_leave(p_employee_id IN NUMBER, p_leave_days OUT NUMBER) IS
+        v_current_balance NUMBER;
+    BEGIN
+        -- Checking the current leave balance for the employee
+        SELECT balance_leaves INTO v_current_balance
+        FROM leave_balance
+        WHERE employee_id = p_employee_id;
+
+        -- Updating the leave balance
+        UPDATE leave_balance
+        SET balance_leaves = v_current_balance + p_leave_days
+        WHERE employee_id = p_employee_id;
+
+        -- If the employee does not exist, insert a new record
+        IF SQL%NOTFOUND THEN
+            INSERT INTO leave_balance (employee_id, balance_leaves)
+            VALUES (p_employee_id, p_leave_days);
+        END IF;
+    END grant_leave;
+
+    FUNCTION get_balance_leaves(p_employee_id IN NUMBER) RETURN NUMBER IS
+        v_balance NUMBER;
+    BEGIN
+        -- Checking the current leave balance for the employee
+        SELECT balance_leaves INTO v_balance
+        FROM leave_balance
+        WHERE employee_id = p_employee_id;
+
+        -- If the employee does not exist, set the balance to 0
+        IF SQL%NOTFOUND THEN
+            v_balance := 0;
+        END IF;
+
+        -- Returning the leave balance
+        RETURN v_balance;
+    END get_balance_leaves;
+END leave_management_pkg;
+/
+
+
+  BEGIN
+      leave_management_pkg.grant_leave(1, 5); -- Grant 5 days leave to employee with ID 1
+      COMMIT;
+  END;
+
+
+  DECLARE
+      v_balance NUMBER;
+  BEGIN
+      v_balance := leave_management_pkg.get_balance_leaves(1); -- Get balance leaves for employee with ID 1
+      DBMS_OUTPUT.PUT_LINE('Balance Leaves: ' || v_balance);
+  END;

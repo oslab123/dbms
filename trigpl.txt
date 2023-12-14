@@ -1,0 +1,28 @@
+CREATE TABLE a(
+  employee_id NUMBER PRIMARY KEY,
+  employee_name VARCHAR2(50),
+  salary NUMBER,
+  last_modified TIMESTAMP
+);
+
+-- Insert some sample values
+INSERT INTO a VALUES (1, 'John Doe', 50000, NULL);
+INSERT INTO a VALUES (2, 'Jane Smith', 60000, NULL);
+INSERT INTO a VALUES (3, 'Bob Johnson', 75000, NULL);
+COMMIT; -- Commit the changes
+
+-- Create the trigger
+CREATE OR REPLACE TRIGGER update_last_modified
+BEFORE UPDATE ON a
+FOR EACH ROW
+BEGIN
+  :new.last_modified := SYSTIMESTAMP;
+END;
+/
+
+-- Update an employee's salary
+UPDATE a
+SET salary = 65000
+WHERE employee_id = 3;
+
+select * from a;
