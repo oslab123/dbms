@@ -1,0 +1,20 @@
+CREATE OR REPLACE PACKAGE EmployeeProjectManagement AS
+PROCEDURE assign_employee_to_project(emp_id IN NUMBER, project_id IN NUMBER);    
+FUNCTION get_employee_project(emp_id IN NUMBER) RETURN NUMBER;
+END EmployeeProjectManagement;
+/
+
+
+CREATE OR REPLACE PACKAGE BODY EmployeeProjectManagement AS
+PROCEDURE assign_employee_to_project(emp_id IN NUMBER, project_id IN NUMBER) IS
+BEGIN
+INSERT INTO EmployeeProjectAssignments(employee_id, project_id) VALUES (emp_id, project_id);
+END assign_employee_to_project;
+FUNCTION get_employee_project(emp_id IN NUMBER) RETURN NUMBER IS
+project_id NUMBER;
+BEGIN
+SELECT project_id INTO project_id FROM EmployeeProjectAssignments WHERE employee_id = emp_id;
+RETURN project_id; 
+END get_employee_project;
+END EmployeeProjectManagement;
+/

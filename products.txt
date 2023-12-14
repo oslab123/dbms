@@ -1,0 +1,83 @@
+CREATE TABLE Products (
+    `product_id` INT PRIMARY KEY,
+    `product_name` VARCHAR(50),
+    `category` VARCHAR(50),
+    `price` DECIMAL(10, 2)
+);
+
+
+
+INSERT INTO Products (product_id, product_name, category, price) VALUES (1, 'Product A', 'Category1', 120.50);
+INSERT INTO Products (product_id, product_name, category, price) VALUES (2, 'Product B', 'Category2', 85.75);
+INSERT INTO Products (product_id, product_name, category, price) VALUES (3, 'Product C', 'Category1', 98.00);
+INSERT INTO Products (product_id, product_name, category, price) VALUES (4, 'Product D', 'Category3', 110.00);
+INSERT INTO Products (product_id, product_name, category, price) VALUES (5, 'Product E', 'Category2', 105.25);
+
+
+
+SELECT category, AVG(price) AS avg_price
+FROM Products
+GROUP BY category;
+
+
+-- Update a record in the Products table
+UPDATE Products
+SET price = 95.00
+WHERE product_id = 3;
+
+
+
+
+SELECT *
+FROM Products
+WHERE price > 100;
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE PACKAGE BODY ec_employee AS
+FUNCTION bonus(empid IN NUMBER) RETURN NUMBER IS
+bonus_percent NUMBER := 0.1;
+emp_salary NUMBER;
+annual_bonus NUMBER;
+BEGIN
+SELECT salary INTO emp_salary FROM EmployeeManagement WHERE empid = EmployeeManagement.empid;
+annual_bonus := bonus_percent * emp_salary;
+RETURN annual_bonus; 
+END bonus;
+PROCEDURE added(empid IN NUMBER, empname IN VARCHAR2, empsal IN NUMBER, hire IN DATE) IS
+BEGIN
+INSERT INTO EmployeeManagement(empid, name, salary, hiredate)
+VALUES(empid, empname, empsal, hire);
+END added;
+END ec_employee;
+
+
+declare
+empid number:=&empid;
+empname varchar2(20):='&empname';
+empsalary number(10,2):=&empsalary;
+emphire date:=TO_DATE('&emphire', 'YYYY-MM-DD');
+begin
+ec_employee.added(empid,empname,empsalary,emphire);
+end;
+
+
+
+DECLARE
+empid NUMBER := &empid;
+cx NUMBER(10,2);
+BEGIN
+cx := ec_employee.bonus(empid);
+dbms_output.put_line('New salary is: ' || cx);
+END;
+/
+
+
+
+
